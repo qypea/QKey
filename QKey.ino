@@ -1,7 +1,8 @@
-#include <AES.h>
-
 #include <SPI.h>
 #include <SD.h>
+
+#include <AtomicFile.h>
+#include <AES.h>
 
 #define LEDSerial 13
 #define LEDSD 8
@@ -51,4 +52,108 @@ void setup() {
 
 // Main loop
 void loop() {
+  String val;
+  File fd;
+
+  if (Serial.available()) {
+    digitalWrite(LEDSD, HIGH);
+    AtomicFile db("/passwd.db", "/passwd.bak");
+    digitalWrite(LEDSD, LOW);
+
+    digitalWrite(LEDSerial, HIGH);
+    char c = Serial.read();
+    digitalWrite(LEDSerial, LOW);
+    switch (c) {
+      case 'w':
+        println("Writing file");
+        digitalWrite(LEDSerial, HIGH);
+        val = Serial.readStringUntil('\n');
+        digitalWrite(LEDSerial, LOW);
+        print("Input string: (");
+        print(val);
+        println(")");
+
+        digitalWrite(LEDSD, HIGH);
+        fd = db.open(FILE_WRITE);
+        fd.seek(0);
+        fd.print(val);
+        fd.close();
+        db.commit();
+        digitalWrite(LEDSD, LOW);
+        break;
+
+      case 'x':
+        println("RWing file");
+        digitalWrite(LEDSerial, HIGH);
+        val = Serial.readStringUntil('\n');
+        digitalWrite(LEDSerial, LOW);
+        print("Input string: (");
+        print(val);
+        println(")");
+
+        digitalWrite(LEDSD, HIGH);
+        fd = db.open(FILE_WRITE);
+        fd.seek(0);
+        fd.print(val);
+        fd.close();
+
+        // Before committing read out old value
+        fd = db.open(FILE_READ);
+        val = fd.readString();
+        fd.close();
+
+        db.commit();
+        digitalWrite(LEDSD, LOW);
+
+        print("Read string: (");
+        print(val);
+        println(")");
+        break;
+
+      case 'r':
+        println("Reading file");
+        digitalWrite(LEDSD, HIGH);
+        fd = db.open(FILE_READ);
+        val = fd.readString();
+        fd.close();
+        db.abort();
+        digitalWrite(LEDSD, LOW);
+
+        print("Read string: (");
+        print(val);
+        println(")");
+        break;
+
+      case 'e':
+        println("Erasing file");
+        SD.remove("/passwd.db");
+        break;
+
+      case 'c':
+        println("Corrupting file");
+        digitalWrite(LEDSerial, HIGH);
+        val = Serial.readStringUntil('\n');
+        digitalWrite(LEDSerial, LOW);
+        print("Input string: (");
+        print(val);
+        println(")");
+
+        digitalWrite(LEDSD, HIGH);
+        fd = db.open(FILE_WRITE);
+        fd.seek(0);
+        fd.print(val);
+        fd.close();
+        digitalWrite(LEDSD, LOW);
+        break;
+
+      case '\r':
+      case '\n':
+        // Ignore extra newlines
+        break;
+
+      default:
+        println("Unknown entry");
+        break;
+    };
+  }
 }
