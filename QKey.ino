@@ -10,19 +10,6 @@ const int LEDSD = 8;
 // Reset helper
 void(*reset) (void) = 0;
 
-// Serial wrappers to blink led when active
-void print(String str) {
-  digitalWrite(LEDSerial, HIGH);
-  Serial.print(str);
-  digitalWrite(LEDSerial, LOW);
-}
-
-void println(String str) {
-  digitalWrite(LEDSerial, HIGH);
-  Serial.println(str);
-  digitalWrite(LEDSerial, LOW);
-}
-
 void setup() {
   pinMode(LEDSerial, OUTPUT);
   pinMode(LEDSD, OUTPUT);
@@ -33,21 +20,22 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  println("Serial connected");
-  digitalWrite(LEDSerial, LOW);
+  Serial.println("Serial connected");
 
   // Open SD Card
-  print("Initializing SD card...");
+  Serial.print("Initializing SD card...");
   digitalWrite(LEDSD, HIGH);
   if (!SD.begin(4)) {
     digitalWrite(LEDSD, LOW);
-    println("failed! Resetting in 5s");
+    Serial.println("failed! Resetting in 5s");
     delay(5*1000);
     reset();
     return;
   }
-  println("done.");
+  Serial.println("done.");
   digitalWrite(LEDSD, LOW);
+
+  digitalWrite(LEDSerial, LOW);
 }
 
 // Main loop
@@ -56,22 +44,19 @@ void loop() {
   File fd;
 
   if (Serial.available()) {
+    digitalWrite(LEDSerial, HIGH);
     digitalWrite(LEDSD, HIGH);
     AtomicFile db("/passwd.db", "/passwd.bak");
     digitalWrite(LEDSD, LOW);
 
-    digitalWrite(LEDSerial, HIGH);
     char c = Serial.read();
-    digitalWrite(LEDSerial, LOW);
     switch (c) {
       case 'w':
-        println("Writing file");
-        digitalWrite(LEDSerial, HIGH);
+        Serial.println("Writing file");
         val = Serial.readStringUntil('\n');
-        digitalWrite(LEDSerial, LOW);
-        print("Input string: (");
-        print(val);
-        println(")");
+        Serial.print("Input string: (");
+        Serial.print(val);
+        Serial.println(")");
 
         digitalWrite(LEDSD, HIGH);
         fd = db.open(FILE_WRITE);
@@ -83,13 +68,11 @@ void loop() {
         break;
 
       case 'x':
-        println("RWing file");
-        digitalWrite(LEDSerial, HIGH);
+        Serial.println("RWing file");
         val = Serial.readStringUntil('\n');
-        digitalWrite(LEDSerial, LOW);
-        print("Input string: (");
-        print(val);
-        println(")");
+        Serial.print("Input string: (");
+        Serial.print(val);
+        Serial.println(")");
 
         digitalWrite(LEDSD, HIGH);
         fd = db.open(FILE_WRITE);
@@ -105,13 +88,13 @@ void loop() {
         db.commit();
         digitalWrite(LEDSD, LOW);
 
-        print("Read string: (");
-        print(val);
-        println(")");
+        Serial.print("Read string: (");
+        Serial.print(val);
+        Serial.println(")");
         break;
 
       case 'r':
-        println("Reading file");
+        Serial.println("Reading file");
         digitalWrite(LEDSD, HIGH);
         fd = db.open(FILE_READ);
         val = fd.readString();
@@ -119,24 +102,22 @@ void loop() {
         db.abort();
         digitalWrite(LEDSD, LOW);
 
-        print("Read string: (");
-        print(val);
-        println(")");
+        Serial.print("Read string: (");
+        Serial.print(val);
+        Serial.println(")");
         break;
 
       case 'e':
-        println("Erasing file");
+        Serial.println("Erasing file");
         SD.remove("/passwd.db");
         break;
 
       case 'c':
-        println("Corrupting file");
-        digitalWrite(LEDSerial, HIGH);
+        Serial.println("Corrupting file");
         val = Serial.readStringUntil('\n');
-        digitalWrite(LEDSerial, LOW);
-        print("Input string: (");
-        print(val);
-        println(")");
+        Serial.print("Input string: (");
+        Serial.print(val);
+        Serial.println(")");
 
         digitalWrite(LEDSD, HIGH);
         fd = db.open(FILE_WRITE);
@@ -152,8 +133,10 @@ void loop() {
         break;
 
       default:
-        println("Unknown entry");
+        Serial.println("Unknown entry");
         break;
     };
+
+    digitalWrite(LEDSerial, LOW);
   }
 }
