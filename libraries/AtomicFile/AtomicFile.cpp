@@ -51,12 +51,16 @@ AtomicFile::AtomicFile(const String filename, const String backup) {
     abort();
   }
 
+  touch();
+  active = false;
+}
+
+void AtomicFile::touch() {
   if (!SD.exists((char*)fileCurrent.c_str())) {
     File fd = SD.open(fileCurrent.c_str(), FILE_WRITE);
     fd.write("");
     fd.close();
   }
-  active = false;
 }
 
 File AtomicFile::open(int mode) {
@@ -74,6 +78,15 @@ File AtomicFile::open(int mode) {
     }
     return SD.open(fileCurrent.c_str(), mode);
   }
+}
+
+void AtomicFile::erase() {
+  if (active) {
+    abort();
+  }
+
+  SD.remove((char*)fileCurrent.c_str());
+  touch();
 }
 
 void AtomicFile::start() {

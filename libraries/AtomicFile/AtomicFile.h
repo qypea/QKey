@@ -20,6 +20,10 @@ class AtomicFile {
     // Always start a transaction first
     File open(int mode);
 
+    // Erase the file if present
+    // Can't be done during a transaction
+    void erase();
+
     // Start and finish the atomic transaction
     void start();
     void abort();
@@ -29,6 +33,8 @@ class AtomicFile {
     String fileCurrent;
     String fileBackup;
     bool active;
+
+    void touch();
 };
 
 #endif
