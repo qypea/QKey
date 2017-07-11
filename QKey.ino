@@ -4,8 +4,8 @@
 #include <AtomicFile.h>
 #include <AES.h>
 
-#define LEDSerial 13
-#define LEDSD 8
+const int LEDSerial = 13;
+const int LEDSD = 8;
 
 // Reset helper
 void(*reset) (void) = 0;
