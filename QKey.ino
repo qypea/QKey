@@ -160,46 +160,45 @@ static void addRecord() {
   Serial.print("Password: ");
   Serial.println(record.password.unwrap());
 
-  Serial.print("Is this ok?(y/n)");
-  if (confirm()) {
-    Serial.println("Ok");
-
-    AtomicFile db = getDB();
-
-    // Read in current header
-    File fd = db.open(FILE_READ);
-    struct PasswordHeader header;
-    fd.read(&header, sizeof(header));
-    fd.close();
-
-    // Write record
-    fd = db.open(FILE_WRITE); // Write appends
-    fd.write((char*)&record, sizeof(record));
-
-    // Write length +1
-    header.recordCount++;
-    fd.seek(0);
-    fd.write((char*)&header, sizeof(header));
-
-    // Commit it all
-    fd.close();
-    db.commit();
-    digitalWrite(LEDSD, LOW);
-
-  } else {
-    Serial.println("Aborted");
+  if (!confirm()) {
+    return;
   }
+
+  AtomicFile db = getDB();
+
+  // Read in current header
+  File fd = db.open(FILE_READ);
+  struct PasswordHeader header;
+  fd.read(&header, sizeof(header));
+  fd.close();
+
+  // Write record
+  fd = db.open(FILE_WRITE); // Write appends
+  fd.write((char*)&record, sizeof(record));
+
+  // Write length +1
+  header.recordCount++;
+  fd.seek(0);
+  fd.write((char*)&header, sizeof(header));
+
+  // Commit it all
+  fd.close();
+  db.commit();
+  digitalWrite(LEDSD, LOW);
 }
 
 static bool confirm() {
+  Serial.print("Are you sure?(y/n)");
   while (true) {
     while (!Serial.available()) {
       delay(100);
     }
     char c = Serial.read();
     if (c == 'y' || c == 'Y') {
+      Serial.println("Ok");
       return true;
     } else if (c == 'n' || c == 'N') {
+      Serial.println("Aborted");
       return false;
     }
   }
@@ -215,13 +214,10 @@ void loop() {
     switch (c) {
       case 'i': // Init the file
         Serial.println("Re-initializing file");
-        Serial.print("Are you sure?(y/n)");
         if (confirm()) {
-          Serial.println("Ok");
           initDB();
           dumpDBHeader();
         } else {
-          Serial.println("Aborted");
         }
         break;
 
