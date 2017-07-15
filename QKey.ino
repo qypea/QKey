@@ -41,6 +41,7 @@ void setup() {
   digitalWrite(LEDSD, LOW);
 
   dumpDBHeader();
+  dumpDB(NULL);
 
   digitalWrite(LEDSerial, LOW);
 }
