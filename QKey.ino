@@ -96,7 +96,7 @@ static void dumpRecordShort(const PasswordRecord & record) {
   Serial.println(record.separator);
 }
 
-static void dumpDB() {
+static void dumpDB(const char * filter) {
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
 
@@ -107,9 +107,22 @@ static void dumpDB() {
   int i;
   for (i = 0; i < header.recordCount; i++) {
     fd.read(&record, sizeof(record));
-    Serial.print(i);
-    Serial.print(": ");
-    dumpRecordShort(record);
+
+    // Determine if we should show this record
+    bool show = true;
+    if (filter != NULL) {
+      String description = String(record.description);
+      int loc = description.indexOf(filter);
+      if (loc == -1) {
+        show = false;
+      }
+    }
+
+    if (show) {
+      Serial.print(i);
+      Serial.print(": ");
+      dumpRecordShort(record);
+    }
   }
 
   fd.close();
@@ -122,6 +135,12 @@ static void readString(char buffer[PASSLEN]) {
     read = Serial.readBytesUntil('\n', buffer, PASSLEN);
   } while (read == 0);
   buffer[read] = 0;
+}
+
+static void find() {
+  char search[PASSLEN];
+  readString("Search term: ", search);
+  dumpDB(search);
 }
 
 static void addRecord() {
