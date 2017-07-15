@@ -89,6 +89,15 @@ void AtomicFile::erase() {
   touch();
 }
 
+void AtomicFile::clear() {
+  if (!active) {
+    start();
+  }
+
+  SD.remove((char*)fileCurrent.c_str());
+  touch();
+}
+
 void AtomicFile::start() {
   if (active) {
     abort();

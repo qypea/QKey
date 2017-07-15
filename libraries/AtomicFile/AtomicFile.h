@@ -24,6 +24,9 @@ class AtomicFile {
     // Can't be done during a transaction
     void erase();
 
+    // Clear the file, leaving the backup intact
+    void clear();
+
     // Start and finish the atomic transaction
     void start();
     void abort();
