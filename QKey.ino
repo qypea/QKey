@@ -24,6 +24,9 @@ void setup() {
   Serial.println("Serial connected");
   Serial.setTimeout(30 * 1000);
 
+  // Initialize keyboard input
+  Keyboard.begin();
+
   // Open SD Card
   Serial.print("Initializing SD card...");
   digitalWrite(LEDSD, HIGH);
@@ -274,7 +277,50 @@ static void showRecord() {
 }
 
 static void enterRecord() {
-  // TODO
+  int target = readRecordI();
+  if (target < 0) {
+    return;
+  }
+
+  // Open, advance
+  AtomicFile db = getDB();
+  File fd = db.open(FILE_READ);
+  struct PasswordRecord record;
+  fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
+
+  // Read
+  fd.read(&record, sizeof(record));
+
+  // Clean up
+  fd.close();
+  db.abort();
+  digitalWrite(LEDSD, LOW);
+
+  if (!confirm()) {
+    return;
+  }
+
+  // TODO: Replace this countdown with confirm on button
+  int i;
+  for (i=0; i<30; i++) {
+    delay(500);
+    digitalWrite(LEDSerial, LOW);
+    delay(500);
+    digitalWrite(LEDSerial, HIGH);
+  }
+
+  // Send record to keyboard
+  Keyboard.print(record.username);
+  if (record.separator == 't') {
+    Keyboard.print('\t');
+  } else if (record.separator == 'n') {
+    Keyboard.print('\n');
+  } else {
+    Serial.println("Unknown separator");
+    return;
+  }
+  Keyboard.print(record.password.unwrap());
+  Keyboard.print('\n');
 }
 
 static bool confirm() {
