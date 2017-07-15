@@ -81,7 +81,7 @@ static void dumpDBHeader() {
   Serial.println(header.fileCheck.unwrap());
 }
 
-static void dumpRecordFull(const PasswordRecord & record) {
+static void dumpRecordFull(const struct PasswordRecord & record) {
   Serial.print("Description: ");
   Serial.println(record.description);
   Serial.print("Username: ");
@@ -92,7 +92,7 @@ static void dumpRecordFull(const PasswordRecord & record) {
   Serial.println(record.password.unwrap());
 }
 
-static void dumpRecordShort(const PasswordRecord & record) {
+static void dumpRecordShort(const struct PasswordRecord & record) {
   Serial.print(record.description);
   Serial.print(", ");
   Serial.print(record.username);
