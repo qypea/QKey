@@ -358,6 +358,7 @@ void loop() {
         Serial.println(" Enter(i)");
         Serial.println(" Init(db)");
         Serial.println(" Print(db)");
+        Serial.println(" Quit");
         break;
 
       case 'f': // Find, print matching records
@@ -397,6 +398,12 @@ void loop() {
       case 'p': // Print db
         Serial.println("Print(db)");
         dumpDB(NULL);
+        break;
+
+      case 'q': // Quit
+        Serial.println("Goodbyte");
+        // TODO: Clear out password variables in ram
+        reset();
         break;
 
       case '\r':
