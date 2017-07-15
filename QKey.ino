@@ -187,6 +187,96 @@ static void addRecord() {
   digitalWrite(LEDSD, LOW);
 }
 
+static int readRecordI() {
+  // Read in current header
+  AtomicFile db = getDB();
+  File fd = db.open(FILE_READ);
+  struct PasswordHeader header;
+  fd.read(&header, sizeof(header));
+  fd.close();
+  db.abort();
+  digitalWrite(LEDSD, LOW);
+
+  // Read in user input as int
+  Serial.print("Index: ");
+  int target = Serial.parseInt();
+
+  // Range check
+  if (target >= header.recordCount) {
+    Serial.println("Invalid record");
+    return -1;
+  }
+
+  Serial.println(target);
+  return target;
+}
+
+static void deleteRecord() {
+  int target = readRecordI();
+  if (target < 0) {
+    return;
+  }
+
+  if (!confirm()) {
+    return;
+  }
+
+  AtomicFile db = getDB();
+  db.start();
+  db.clear();
+
+  // Read in current header
+  File r_fd = db.open(FILE_READ);
+  struct PasswordHeader header;
+  r_fd.read(&header, sizeof(header));
+
+  // Open for write
+  File w_fd = db.open(FILE_WRITE); // Write appends
+  header.recordCount--;
+  w_fd.write((char*)&header, sizeof(header));
+
+  int i;
+  struct PasswordRecord record;
+  for (i=0; i<header.recordCount+1; i++) {
+    r_fd.read(&record, sizeof(record));
+    if (i != target) {
+      w_fd.write((char*)&record, sizeof(record));
+    }
+  }
+
+  // Commit it all
+  r_fd.close();
+  w_fd.close();
+  db.commit();
+  digitalWrite(LEDSD, LOW);
+}
+
+static void showRecord() {
+  int target = readRecordI();
+  if (target < 0) {
+    return;
+  }
+
+  // Open, advance
+  AtomicFile db = getDB();
+  File fd = db.open(FILE_READ);
+  struct PasswordRecord record;
+  fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
+
+  // Read in, print record
+  fd.read(&record, sizeof(record));
+  dumpRecordFull(record);
+
+  // Clean up
+  fd.close();
+  db.abort();
+  digitalWrite(LEDSD, LOW);
+}
+
+static void enterRecord() {
+  // TODO
+}
+
 static bool confirm() {
   Serial.print("Are you sure?(y/n)");
   while (true) {
@@ -212,8 +302,44 @@ void loop() {
 
     char c = Serial.read();
     switch (c) {
+      case 'h':
+        Serial.println("Help");
+        Serial.println(" Find");
+        Serial.println(" Add");
+        Serial.println(" Delete(i)");
+        Serial.println(" Show(i)");
+        Serial.println(" Enter(i)");
+        Serial.println(" Init(db)");
+        Serial.println(" Print(db)");
+        break;
+
+      case 'f': // Find, print matching records
+        Serial.println("Find");
+        find();
+        break;
+
+      case 'a': // Add record
+        Serial.println("Add");
+        addRecord();
+        break;
+
+      case 'd': // Delete record(by index)
+        Serial.println("Delete(i)");
+        deleteRecord();
+        break;
+
+      case 's': // Show record including password (by index)
+        Serial.println("Show(i)");
+        showRecord();
+        break;
+
+      case 'e': // Enter(ghost type)
+        Serial.println("Enter(i)");
+        enterRecord();
+        break;
+
       case 'i': // Init the file
-        Serial.println("Re-initializing file");
+        Serial.println("Init(db)");
         if (confirm()) {
           initDB();
           dumpDBHeader();
@@ -221,20 +347,10 @@ void loop() {
         }
         break;
 
-      case 'a': // Add record
-        Serial.println("Adding a record");
-        addRecord();
+      case 'p': // Print db
+        Serial.println("Print(db)");
+        dumpDB(NULL);
         break;
-
-      case 'p': // Print db listing
-        Serial.println("DB contents:");
-        dumpDB();
-        break;
-
-      // TODO: Delete record(by index)
-      // TODO: Find, print matching records
-      // TODO: Print record including password (by index)
-      // TODO: Ghost type a record(by index)
 
       case '\r':
       case '\n':
