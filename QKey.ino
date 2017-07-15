@@ -9,7 +9,7 @@ const int LEDSerial = 13;
 const int LEDSD = 8;
 
 // Reset helper
-void(*reset) (void) = 0;
+static void(*reset) (void) = 0;
 
 void setup() {
   pinMode(LEDSerial, OUTPUT);
@@ -42,13 +42,13 @@ void setup() {
   digitalWrite(LEDSerial, LOW);
 }
 
-AtomicFile getDB() {
+static AtomicFile getDB() {
   digitalWrite(LEDSD, HIGH);
   AtomicFile db("/passwd.db", "/passwd.bak");
   return db;
 }
 
-void initDB() {
+static void initDB() {
   struct PasswordHeader header;
   header.recordCount = 0;
   header.fileCheck.randomize();
@@ -63,7 +63,7 @@ void initDB() {
   digitalWrite(LEDSD, LOW);
 }
 
-void dumpDBHeader() {
+static void dumpDBHeader() {
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
   struct PasswordHeader header;
@@ -77,7 +77,7 @@ void dumpDBHeader() {
   Serial.println(header.fileCheck.unwrap());
 }
 
-void dumpRecordFull(const PasswordRecord & record) {
+static void dumpRecordFull(const PasswordRecord & record) {
   Serial.print("Description: ");
   Serial.println(record.description);
   Serial.print("Username: ");
@@ -88,7 +88,7 @@ void dumpRecordFull(const PasswordRecord & record) {
   Serial.println(record.password.unwrap());
 }
 
-void dumpRecordShort(const PasswordRecord & record) {
+static void dumpRecordShort(const PasswordRecord & record) {
   Serial.print(record.description);
   Serial.print(", ");
   Serial.print(record.username);
@@ -96,7 +96,7 @@ void dumpRecordShort(const PasswordRecord & record) {
   Serial.println(record.separator);
 }
 
-void dumpDB() {
+static void dumpDB() {
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
 
@@ -116,7 +116,7 @@ void dumpDB() {
   digitalWrite(LEDSD, LOW);
 }
 
-void readString(char buffer[PASSLEN]) {
+static void readString(char buffer[PASSLEN]) {
   int read;
   do {
     read = Serial.readBytesUntil('\n', buffer, PASSLEN);
@@ -124,7 +124,7 @@ void readString(char buffer[PASSLEN]) {
   buffer[read] = 0;
 }
 
-void addRecord() {
+static void addRecord() {
   PasswordRecord record;
 
   Serial.print("Description: ");
@@ -176,7 +176,7 @@ void addRecord() {
   }
 }
 
-bool confirm() {
+static bool confirm() {
   while (true) {
     while (!Serial.available()) {
       delay(100);
