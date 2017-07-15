@@ -129,12 +129,14 @@ static void dumpDB(const char * filter) {
   digitalWrite(LEDSD, LOW);
 }
 
-static void readString(char buffer[PASSLEN]) {
+static void readString(const char * prompt, char buffer[PASSLEN]) {
+  Serial.print(prompt);
   int read;
   do {
     read = Serial.readBytesUntil('\n', buffer, PASSLEN);
   } while (read == 0);
   buffer[read] = 0;
+  Serial.println(buffer);
 }
 
 static void find() {
@@ -145,14 +147,8 @@ static void find() {
 
 static void addRecord() {
   PasswordRecord record;
-
-  Serial.print("Description: ");
-  readString(record.description);
-  Serial.println(record.description);
-
-  Serial.print("Username: ");
-  readString(record.username);
-  Serial.println(record.username);
+  readString("Description: ", record.description);
+  readString("Username: ", record.username);
 
   Serial.print("Separator(t,n): ");
   do {
