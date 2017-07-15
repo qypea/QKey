@@ -11,9 +11,17 @@ const int LEDSD = 8;
 // Reset helper
 static void(*reset) (void) = 0;
 
+// Random generator
+unsigned char randomChar() {
+  return random(256); // TODO: Stronger entropy!
+}
+
 void setup() {
   pinMode(LEDSerial, OUTPUT);
   pinMode(LEDSD, OUTPUT);
+
+  // Seed RNG initially
+  randomSeed(analogRead(0));
 
   // Open serial communications and wait for port to open:
   digitalWrite(LEDSerial, HIGH);
@@ -55,7 +63,7 @@ static AtomicFile getDB() {
 static void initDB() {
   struct PasswordHeader header;
   header.recordCount = 0;
-  header.fileCheck.randomize();
+  header.fileCheck.randomize(TOKENEXT);
 
   // Erase the DB and write the new header
   AtomicFile db = getDB();
@@ -160,7 +168,22 @@ static void addRecord() {
   } while(record.separator != 't' && record.separator != 'n');
   Serial.println(record.separator);
 
-  record.password.randomize();
+  Serial.print("Allowed Chars(b/e): ");
+  char allowed;
+  do {
+    allowed = Serial.read();
+  } while(allowed != 'b' && allowed != 'e');
+  Serial.println(allowed);
+
+  if (allowed == 'b') {
+    record.password.randomize(TOKENBASE);
+  } else if (allowed == 'e') {
+    record.password.randomize(TOKENEXT);
+  } else {
+    Serial.println("Unexpected allowed chars");
+    reset();
+  }
+
   Serial.print("Password: ");
   Serial.println(record.password.unwrap());
 
@@ -405,6 +428,22 @@ void loop() {
         // TODO: Clear out password variables in ram
         reset();
         break;
+
+      case 'r': // RNG Test
+        Serial.println("RNG test");
+        struct Token t;
+        int i;
+        for (i=0; i<8; i++) {
+          t.randomize(TOKENBASE);
+          Serial.println(t.unwrap());
+        }
+        Serial.println();
+        for (i=0; i<8; i++) {
+          t.randomize(TOKENEXT);
+          Serial.println(t.unwrap());
+        }
+        break;
+
 
       case '\r':
       case '\n':
