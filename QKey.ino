@@ -179,13 +179,23 @@ static void addRecord() {
   readString("Username: ", record.username);
   record.separator = readChar("Separator(t,n): ", "tn");
 
-  char allowed = readChar("Allowed Chars(b,e): ", "be");
-  if (allowed == 'b') {
-    record.password.randomize(TOKENBASE);
-  } else if (allowed == 'e') {
-    record.password.randomize(TOKENEXT);
+  char method = readChar("Random or Manual password?(r/m) ", "rm");
+  if (method == 'r') {
+    char allowed = readChar("Allowed Chars(b,e): ", "be");
+    if (allowed == 'b') {
+      record.password.randomize(TOKENBASE);
+    } else if (allowed == 'e') {
+      record.password.randomize(TOKENEXT);
+    } else {
+      Serial.println("Unexpected allowed chars");
+      reset();
+    }
+  } else if (method == 'm') {
+    char pass[PASSLEN];
+    readString("Password: ", pass);
+    record.password.wrap(pass);
   } else {
-    Serial.println("Unexpected allowed chars");
+    Serial.println("Unexpected password method");
     reset();
   }
 
