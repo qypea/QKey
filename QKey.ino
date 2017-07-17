@@ -151,6 +151,22 @@ static void readString(const char * prompt, char buffer[PASSLEN]) {
   Serial.println(buffer);
 }
 
+static char readChar(const char * prompt, const char * allowed) {
+  Serial.print(prompt);
+  String allowed_s(allowed);
+  char r;
+
+  do {
+    while (!Serial.available()) {
+      delay(100);
+    }
+    r = Serial.read();
+  } while(allowed_s.indexOf(r) == -1);
+  Serial.println(r);
+
+  return r;
+}
+
 static void find() {
   char search[PASSLEN];
   readString("Search term: ", search);
@@ -161,20 +177,9 @@ static void addRecord() {
   PasswordRecord record;
   readString("Description: ", record.description);
   readString("Username: ", record.username);
+  record.separator = readChar("Separator(t,n): ", "tn");
 
-  Serial.print("Separator(t,n): ");
-  do {
-    record.separator = Serial.read();
-  } while(record.separator != 't' && record.separator != 'n');
-  Serial.println(record.separator);
-
-  Serial.print("Allowed Chars(b/e): ");
-  char allowed;
-  do {
-    allowed = Serial.read();
-  } while(allowed != 'b' && allowed != 'e');
-  Serial.println(allowed);
-
+  char allowed = readChar("Allowed Chars(b,e): ", "be");
   if (allowed == 'b') {
     record.password.randomize(TOKENBASE);
   } else if (allowed == 'e') {
@@ -348,19 +353,13 @@ static void enterRecord() {
 }
 
 static bool confirm() {
-  Serial.print("Are you sure?(y/n)");
-  while (true) {
-    while (!Serial.available()) {
-      delay(100);
-    }
-    char c = Serial.read();
-    if (c == 'y' || c == 'Y') {
-      Serial.println("Ok");
-      return true;
-    } else if (c == 'n' || c == 'N') {
-      Serial.println("Aborted");
-      return false;
-    }
+  char c = readChar("Are you sure?(y,n): ", "yYnN");
+  if (c == 'y' || c == 'Y') {
+    Serial.println("Ok");
+    return true;
+  } else if (c == 'n' || c == 'N') {
+    Serial.println("Aborted");
+    return false;
   }
 }
 
