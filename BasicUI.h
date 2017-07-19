@@ -35,6 +35,9 @@ static bool confirm() {
   } else if (c == 'n' || c == 'N') {
     Serial.println("Aborted");
     return false;
+  } else {
+    Serial.println("Logic error");
+    return false;
   }
 }
 
