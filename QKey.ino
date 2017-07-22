@@ -2,7 +2,7 @@
 #include <SD.h>
 
 #include <AtomicFile.h>
-#include <AES.h>
+#include <SpritzCipher.h>
 
 #include "PasswordDB.h"
 #include "BasicUI.h"
@@ -49,6 +49,9 @@ void setup() {
   }
   Serial.println("done.");
   digitalWrite(LEDSD, LOW);
+
+  readString("Password: ", (char*)masterKey);
+  masterKeyLen = strlen((char*)masterKey);
 
   dumpDBHeader();
   dumpDB(NULL);
@@ -169,7 +172,7 @@ static void addRecord() {
   } else if (method == 'm') {
     char pass[PASSLEN];
     readString("Password: ", pass);
-    record.password.wrap(pass);
+    record.password.wrap((uint8_t*)pass, strlen(pass));
   } else {
     Serial.println("Unexpected password method");
     reset();

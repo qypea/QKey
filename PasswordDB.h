@@ -4,6 +4,8 @@
 #define PASSLEN 64
 
 unsigned char randomChar();
+uint8_t masterKey[PASSLEN] = "unset";
+size_t masterKeyLen = 5;
 
 static const char TokenChars[] =
   "0123456789" // 0..9
@@ -14,26 +16,54 @@ static const char TokenChars[] =
 #define TOKENEXT 91
 
 struct Token {
-  char password[PASSLEN];
+  uint8_t cipherText[PASSLEN];
+  uint8_t cipherLength;
+  uint8_t nonce[PASSLEN];
 
-  String unwrap() const {
-    // TODO: Decrypt
-    return String(password);
+  size_t unwrap(uint8_t * buffer, size_t bufferLen) const {
+    spritz_ctx ctx;
+    spritz_setup_withIV(&ctx,
+                        masterKey, masterKeyLen,
+                        nonce, PASSLEN);
+    size_t len = min(cipherLength, bufferLen);
+    spritz_crypt(&ctx, cipherText, len, buffer);
+    return len;
   }
 
-  void wrap(String pass) {
-    // TODO: Encrypt
-    strcpy(password, pass.c_str());
+  String unwrap() const {
+    uint8_t temp[PASSLEN];
+    size_t len = unwrap(temp, PASSLEN);
+    temp[len] = '\0';
+    return String((char*)temp);
+  }
+
+  void randomNonce() {
+    int i;
+    for (i=0; i<PASSLEN; i++) {
+      nonce[i] = randomChar();
+    }
+  }
+
+  void wrap(const uint8_t * buffer, size_t bufferLen) {
+    randomNonce();
+    spritz_ctx ctx;
+    spritz_setup_withIV(&ctx,
+                        masterKey, masterKeyLen,
+                        nonce, PASSLEN);
+    spritz_crypt(&ctx, buffer, bufferLen, cipherText);
+    cipherLength = bufferLen;
   }
 
   void randomize(unsigned int chars) {
     const int length = 16; // All passwords are 16B
+    uint8_t temp[length];
     int i;
     for (i=0; i<length; i++) {
       unsigned char c = randomChar();
-      password[i] = TokenChars[c % chars];
+      temp[i] = TokenChars[c % chars];
     }
-    password[length] = '\0';
+
+    wrap(temp, length);
   }
 
 } __attribute__((packed));
