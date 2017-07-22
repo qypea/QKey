@@ -10,6 +10,10 @@
 const int LEDSerial = 13;
 const int LEDSD = 8;
 
+static struct PasswordHeader header;
+static struct PasswordRecord record;
+
+
 // Reset helper
 static void(*reset) (void) = 0;
 
@@ -66,7 +70,6 @@ static AtomicFile getDB() {
 }
 
 static void initDB() {
-  struct PasswordHeader header;
   header.recordCount = 0;
   header.fileCheck.randomize(TOKENEXT);
 
@@ -83,7 +86,6 @@ static void initDB() {
 static void dumpDBHeader() {
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
-  struct PasswordHeader header;
   fd.read(&header, sizeof(header));
   fd.close();
   digitalWrite(LEDSD, LOW);
@@ -117,10 +119,8 @@ static void dumpDB(const char * filter) {
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
 
-  struct PasswordHeader header;
   fd.read(&header, sizeof(header));
 
-  struct PasswordRecord record;
   int i;
   for (i = 0; i < header.recordCount; i++) {
     fd.read(&record, sizeof(record));
@@ -189,7 +189,6 @@ static void addRecord() {
 
   // Read in current header
   File fd = db.open(FILE_READ);
-  struct PasswordHeader header;
   fd.read(&header, sizeof(header));
   fd.close();
 
@@ -212,7 +211,6 @@ static int readRecordI() {
   // Read in current header
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
-  struct PasswordHeader header;
   fd.read(&header, sizeof(header));
   fd.close();
   db.abort();
@@ -248,7 +246,6 @@ static void deleteRecord() {
 
   // Read in current header
   File r_fd = db.open(FILE_READ);
-  struct PasswordHeader header;
   r_fd.read(&header, sizeof(header));
 
   // Open for write
@@ -257,7 +254,6 @@ static void deleteRecord() {
   w_fd.write((char*)&header, sizeof(header));
 
   int i;
-  struct PasswordRecord record;
   for (i=0; i<header.recordCount+1; i++) {
     r_fd.read(&record, sizeof(record));
     if (i != target) {
@@ -281,7 +277,6 @@ static void showRecord() {
   // Open, advance
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
-  struct PasswordRecord record;
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
   // Read in, print record
@@ -303,7 +298,6 @@ static void enterRecord() {
   // Open, advance
   AtomicFile db = getDB();
   File fd = db.open(FILE_READ);
-  struct PasswordRecord record;
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
   // Read
@@ -405,22 +399,6 @@ void loop() {
         // TODO: Clear out password variables in ram
         reset();
         break;
-
-      case 'r': // RNG Test
-        Serial.println("RNG test");
-        struct Token t;
-        int i;
-        for (i=0; i<8; i++) {
-          t.randomize(TOKENBASE);
-          Serial.println(t.unwrap());
-        }
-        Serial.println();
-        for (i=0; i<8; i++) {
-          t.randomize(TOKENEXT);
-          Serial.println(t.unwrap());
-        }
-        break;
-
 
       case '\r':
       case '\n':
