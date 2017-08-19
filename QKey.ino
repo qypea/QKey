@@ -37,16 +37,25 @@ static void reset() {
 }
 
 // Random generator
+void randomInit() {
+  // TODO: Connect a pin to more random signal
+  long int seed = millis();
+  seed = seed ^ (analogRead(0) << 24);
+  seed = seed ^ (analogRead(1) << 16);
+  seed = seed ^ (analogRead(2) << 8);
+  seed = seed ^ (analogRead(3) << 0);
+
+  Serial.print(F("Random seed: "));
+  Serial.println(seed);
+  randomSeed(seed);
+}
 unsigned char randomChar() {
-  return random(256); // TODO: Stronger entropy!
+  return random(256);
 }
 
 void setup() {
   pinMode(LEDSerial, OUTPUT);
   pinMode(LEDSD, OUTPUT);
-
-  // Seed RNG initially
-  randomSeed(analogRead(0));
 
   // Open serial communications and wait for port to open:
   digitalWrite(LEDSerial, HIGH);
@@ -77,6 +86,8 @@ void setup() {
 
   dumpDBHeader();
   dumpDB(NULL);
+
+  randomInit();
 
   digitalWrite(LEDSerial, LOW);
 }
