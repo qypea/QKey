@@ -41,6 +41,8 @@ static void copyFile(const String in, const String out) {
   FDin.close();
 }
 
+AtomicFile::AtomicFile() {};
+
 AtomicFile::AtomicFile(const String filename, const String backup) {
   fileCurrent = filename;
   fileBackup = backup;

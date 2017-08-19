@@ -7,6 +7,8 @@ unsigned char randomChar();
 uint8_t masterKey[PASSLEN] = "unset";
 size_t masterKeyLen = 5;
 
+static uint8_t temp[PASSLEN];
+
 static const char TokenChars[] =
   "0123456789" // 0..9
   "abcdefghijklmnopqrstuvwxyz"     // 10..35
@@ -31,7 +33,6 @@ struct Token {
   }
 
   String unwrap() const {
-    uint8_t temp[PASSLEN];
     size_t len = unwrap(temp, PASSLEN);
     temp[len] = '\0';
     return String((char*)temp);
@@ -56,7 +57,6 @@ struct Token {
 
   void randomize(unsigned int chars) {
     const int length = 16; // All passwords are 16B
-    uint8_t temp[length];
     int i;
     for (i=0; i<length; i++) {
       unsigned char c = randomChar();

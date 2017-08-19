@@ -15,6 +15,7 @@ class AtomicFile {
   public:
     // Construct an atomic file with the specified backup
     AtomicFile(String filename, String backup);
+    AtomicFile();
 
     // Open the file for the given mode
     // Always start a transaction first

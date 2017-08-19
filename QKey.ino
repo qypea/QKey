@@ -12,7 +12,9 @@ const int LEDSD = 8;
 
 static struct PasswordHeader header;
 static struct PasswordRecord record;
-
+static AtomicFile db;
+static char search[PASSLEN];
+static char pass[PASSLEN];
 
 // Reset helper
 static void(*reset) (void) = 0;
@@ -63,10 +65,9 @@ void setup() {
   digitalWrite(LEDSerial, LOW);
 }
 
-static AtomicFile getDB() {
+static void getDB() {
   digitalWrite(LEDSD, HIGH);
-  AtomicFile db("/passwd.db", "/passwd.bak");
-  return db;
+  db = AtomicFile("/passwd.db", "/passwd.bak");
 }
 
 static void initDB() {
@@ -74,7 +75,7 @@ static void initDB() {
   header.fileCheck.randomize(TOKENEXT);
 
   // Erase the DB and write the new header
-  AtomicFile db = getDB();
+  getDB();
   db.erase();
   File fd = db.open(FILE_WRITE);
   fd.write((char*)&header, sizeof(header));
@@ -84,7 +85,7 @@ static void initDB() {
 }
 
 static void dumpDBHeader() {
-  AtomicFile db = getDB();
+  getDB();
   File fd = db.open(FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
@@ -116,7 +117,7 @@ static void dumpRecordShort(const struct PasswordRecord & record) {
 }
 
 static void dumpDB(const char * filter) {
-  AtomicFile db = getDB();
+  getDB();
   File fd = db.open(FILE_READ);
 
   fd.read(&header, sizeof(header));
@@ -147,13 +148,11 @@ static void dumpDB(const char * filter) {
 }
 
 static void find() {
-  char search[PASSLEN];
   readString("Search term: ", search);
   dumpDB(search);
 }
 
 static void addRecord() {
-  PasswordRecord record;
   readString("Description: ", record.description);
   readString("Username: ", record.username);
   record.separator = readChar("Separator(t,n): ", "tn");
@@ -170,7 +169,6 @@ static void addRecord() {
       reset();
     }
   } else if (method == 'm') {
-    char pass[PASSLEN];
     readString("Password: ", pass);
     record.password.wrap((uint8_t*)pass, strlen(pass));
   } else {
@@ -185,7 +183,7 @@ static void addRecord() {
     return;
   }
 
-  AtomicFile db = getDB();
+  getDB();
 
   // Read in current header
   File fd = db.open(FILE_READ);
@@ -209,7 +207,7 @@ static void addRecord() {
 
 static int readRecordI() {
   // Read in current header
-  AtomicFile db = getDB();
+  getDB();
   File fd = db.open(FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
@@ -240,7 +238,7 @@ static void deleteRecord() {
     return;
   }
 
-  AtomicFile db = getDB();
+  getDB();
   db.start();
   db.clear();
 
@@ -275,7 +273,7 @@ static void showRecord() {
   }
 
   // Open, advance
-  AtomicFile db = getDB();
+  getDB();
   File fd = db.open(FILE_READ);
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
@@ -296,7 +294,7 @@ static void enterRecord() {
   }
 
   // Open, advance
-  AtomicFile db = getDB();
+  getDB();
   File fd = db.open(FILE_READ);
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
