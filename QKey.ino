@@ -37,26 +37,26 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
-  Serial.println("Serial connected");
+  Serial.println(F("Serial connected"));
   Serial.setTimeout(30 * 1000);
 
   // Initialize keyboard input
   Keyboard.begin();
 
   // Open SD Card
-  Serial.print("Initializing SD card...");
+  Serial.print(F("Initializing SD card..."));
   digitalWrite(LEDSD, HIGH);
   if (!SD.begin(4)) {
     digitalWrite(LEDSD, LOW);
-    Serial.println("failed! Resetting in 5s");
+    Serial.println(F("failed! Resetting in 5s"));
     delay(5*1000);
     reset();
     return;
   }
-  Serial.println("done.");
+  Serial.println(F("done."));
   digitalWrite(LEDSD, LOW);
 
-  readString("Password: ", (char*)masterKey);
+  readString(F("Password: "), (char*)masterKey);
   masterKeyLen = strlen((char*)masterKey);
 
   dumpDBHeader();
@@ -67,7 +67,7 @@ void setup() {
 
 static void getDB() {
   digitalWrite(LEDSD, HIGH);
-  db = AtomicFile("/passwd.db", "/passwd.bak");
+  db = AtomicFile(F("/passwd.db"), F("/passwd.bak"));
 }
 
 static void initDB() {
@@ -91,28 +91,28 @@ static void dumpDBHeader() {
   fd.close();
   digitalWrite(LEDSD, LOW);
 
-  Serial.print("Records: ");
+  Serial.print(F("Records: "));
   Serial.println(header.recordCount);
-  Serial.print("File check: ");
+  Serial.print(F("File check: "));
   Serial.println(header.fileCheck.unwrap());
 }
 
 static void dumpRecordFull(const struct PasswordRecord & record) {
-  Serial.print("Description: ");
+  Serial.print(F("Description: "));
   Serial.println(record.description);
-  Serial.print("Username: ");
+  Serial.print(F("Username: "));
   Serial.println(record.username);
-  Serial.print("Separator: ");
+  Serial.print(F("Separator: "));
   Serial.println(record.separator);
-  Serial.print("Password: ");
+  Serial.print(F("Password: "));
   Serial.println(record.password.unwrap());
 }
 
 static void dumpRecordShort(const struct PasswordRecord & record) {
   Serial.print(record.description);
-  Serial.print(", ");
+  Serial.print(F(", "));
   Serial.print(record.username);
-  Serial.print(", ");
+  Serial.print(F(", "));
   Serial.println(record.separator);
 }
 
@@ -138,7 +138,7 @@ static void dumpDB(const char * filter) {
 
     if (show) {
       Serial.print(i);
-      Serial.print(": ");
+      Serial.print(F(": "));
       dumpRecordShort(record);
     }
   }
@@ -148,35 +148,35 @@ static void dumpDB(const char * filter) {
 }
 
 static void find() {
-  readString("Search term: ", search);
+  readString(F("Search term: "), search);
   dumpDB(search);
 }
 
 static void addRecord() {
-  readString("Description: ", record.description);
-  readString("Username: ", record.username);
-  record.separator = readChar("Separator(t,n): ", "tn");
+  readString(F("Description: "), record.description);
+  readString(F("Username: "), record.username);
+  record.separator = readChar(F("Separator(t,n): "), "tn");
 
-  char method = readChar("Random or Manual password?(r/m) ", "rm");
+  char method = readChar(F("Random or Manual password?(r/m) "), "rm");
   if (method == 'r') {
-    char allowed = readChar("Allowed Chars(b,e): ", "be");
+    char allowed = readChar(F("Allowed Chars(b,e): "), "be");
     if (allowed == 'b') {
       record.password.randomize(TOKENBASE);
     } else if (allowed == 'e') {
       record.password.randomize(TOKENEXT);
     } else {
-      Serial.println("Unexpected allowed chars");
+      Serial.println(F("Unexpected allowed chars"));
       reset();
     }
   } else if (method == 'm') {
-    readString("Password: ", pass);
+    readString(F("Password: "), pass);
     record.password.wrap((uint8_t*)pass, strlen(pass));
   } else {
-    Serial.println("Unexpected password method");
+    Serial.println(F("Unexpected password method"));
     reset();
   }
 
-  Serial.print("Password: ");
+  Serial.print(F("Password: "));
   Serial.println(record.password.unwrap());
 
   if (!confirm()) {
@@ -215,12 +215,12 @@ static int readRecordI() {
   digitalWrite(LEDSD, LOW);
 
   // Read in user input as int
-  Serial.print("Index: ");
+  Serial.print(F("Index: "));
   int target = Serial.parseInt();
 
   // Range check
   if (target >= header.recordCount) {
-    Serial.println("Invalid record");
+    Serial.println(F("Invalid record"));
     return -1;
   }
 
@@ -326,7 +326,7 @@ static void enterRecord() {
   } else if (record.separator == 'n') {
     Keyboard.print('\n');
   } else {
-    Serial.println("Unknown separator");
+    Serial.println(F("Unknown separator"));
     return;
   }
   Keyboard.print(record.password.unwrap());
@@ -342,44 +342,44 @@ void loop() {
     char c = Serial.read();
     switch (c) {
       case 'h':
-        Serial.println("Help");
-        Serial.println(" Find");
-        Serial.println(" Add");
-        Serial.println(" Delete(i)");
-        Serial.println(" Show(i)");
-        Serial.println(" Enter(i)");
-        Serial.println(" Init(db)");
-        Serial.println(" Print(db)");
-        Serial.println(" Quit");
+        Serial.println(F("Help"));
+        Serial.println(F(" Find"));
+        Serial.println(F(" Add"));
+        Serial.println(F(" Delete(i)"));
+        Serial.println(F(" Show(i)"));
+        Serial.println(F(" Enter(i)"));
+        Serial.println(F(" Init(db)"));
+        Serial.println(F(" Print(db)"));
+        Serial.println(F(" Quit"));
         break;
 
       case 'f': // Find, print matching records
-        Serial.println("Find");
+        Serial.println(F("Find"));
         find();
         break;
 
       case 'a': // Add record
-        Serial.println("Add");
+        Serial.println(F("Add"));
         addRecord();
         break;
 
       case 'd': // Delete record(by index)
-        Serial.println("Delete(i)");
+        Serial.println(F("Delete(i)"));
         deleteRecord();
         break;
 
       case 's': // Show record including password (by index)
-        Serial.println("Show(i)");
+        Serial.println(F("Show(i)"));
         showRecord();
         break;
 
       case 'e': // Enter(ghost type)
-        Serial.println("Enter(i)");
+        Serial.println(F("Enter(i)"));
         enterRecord();
         break;
 
       case 'i': // Init the file
-        Serial.println("Init(db)");
+        Serial.println(F("Init(db)"));
         if (confirm()) {
           initDB();
           dumpDBHeader();
@@ -388,12 +388,12 @@ void loop() {
         break;
 
       case 'p': // Print db
-        Serial.println("Print(db)");
+        Serial.println(F("Print(db)"));
         dumpDB(NULL);
         break;
 
       case 'q': // Quit
-        Serial.println("Goodbyte");
+        Serial.println(F("Goodbyte"));
         // TODO: Clear out password variables in ram
         reset();
         break;
@@ -404,7 +404,7 @@ void loop() {
         break;
 
       default:
-        Serial.print("Unknown command: ");
+        Serial.print(F("Unknown command: "));
         Serial.println(c);
         break;
     };

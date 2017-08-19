@@ -1,7 +1,7 @@
 #ifndef _QKEY_BASICUI_H_
 #define _QKEY_BASICUI_H_
 
-static void readString(const char * prompt, char buffer[PASSLEN]) {
+static void readString(const __FlashStringHelper* prompt, char buffer[PASSLEN]) {
   Serial.print(prompt);
   int read;
   do {
@@ -11,7 +11,7 @@ static void readString(const char * prompt, char buffer[PASSLEN]) {
   Serial.println(buffer);
 }
 
-static char readChar(const char * prompt, const char * allowed) {
+static char readChar(const __FlashStringHelper* prompt, const char * allowed) {
   Serial.print(prompt);
   String allowed_s(allowed);
   char r;
@@ -28,15 +28,15 @@ static char readChar(const char * prompt, const char * allowed) {
 }
 
 static bool confirm() {
-  char c = readChar("Are you sure?(y,n): ", "yYnN");
+  char c = readChar(F("Are you sure?(y,n): "), "yYnN");
   if (c == 'y' || c == 'Y') {
-    Serial.println("Ok");
+    Serial.println(F("Ok"));
     return true;
   } else if (c == 'n' || c == 'N') {
-    Serial.println("Aborted");
+    Serial.println(F("Aborted"));
     return false;
   } else {
-    Serial.println("Logic error");
+    Serial.println(F("Logic error"));
     return false;
   }
 }
