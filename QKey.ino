@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <SD.h>
+#include <avr/wdt.h>
 
 #include <AtomicFile.h>
 #include <SpritzCipher.h>
@@ -17,7 +18,23 @@ static char search[PASSLEN];
 static char pass[PASSLEN];
 
 // Reset helper
-static void(*reset) (void) = 0;
+static void reset() {
+  // Clear key material
+  int i;
+  for (i=0; i<PASSLEN; i++) {
+    masterKey[i] = 0;
+    search[i] = 0;
+    pass[i] = 0;
+    temp[i] = 0;
+  }
+
+  // Reset after a time delay
+  Serial.println(F("Resetting in 4s. Close serial ports"));
+  digitalWrite(LEDSerial, LOW);
+  delay(4*1000);
+  wdt_enable(WDTO_60MS);
+  while(1){};
+}
 
 // Random generator
 unsigned char randomChar() {
@@ -48,8 +65,7 @@ void setup() {
   digitalWrite(LEDSD, HIGH);
   if (!SD.begin(4)) {
     digitalWrite(LEDSD, LOW);
-    Serial.println(F("failed! Resetting in 5s"));
-    delay(5*1000);
+    Serial.println(F("failed!"));
     reset();
     return;
   }
@@ -394,7 +410,6 @@ void loop() {
 
       case 'q': // Quit
         Serial.println(F("Goodbyte"));
-        // TODO: Clear out password variables in ram
         reset();
         break;
 
