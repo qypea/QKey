@@ -13,9 +13,9 @@ static const char TokenChars[] =
   "0123456789" // 0..9
   "abcdefghijklmnopqrstuvwxyz"     // 10..35
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"     // 36..61
-  "~!@#$%^&*()-_=+[]{}|;:<>?,./ "; // 62..90
+  "~!@#$%^&*()-_=+[]{}|;:<>?,./";  // 62..89
 #define TOKENBASE 62
-#define TOKENEXT 91
+#define TOKENEXT 90
 
 struct Token {
   uint8_t cipherText[PASSLEN];
