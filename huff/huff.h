@@ -44,6 +44,25 @@ size_t findIndex(char v) {
     return -1;
 }
 
+#define pushBits(v, len) do { \
+    unsigned char val = v; \
+    printf("push 0x%02x(%u) before=0x%04x(%lu)  ", val, len, temp, bitsUsed); \
+    temp |= val << (16 - bitsUsed - len); \
+    bitsUsed += len; \
+    printf("after=0x%04x(%lu)\n", temp, bitsUsed); \
+    } while(0)
+
+#define peekBits(len) (temp >> (16 - len))
+
+#define popBits(len) do { \
+    printf("pop %u before=0x%04x(%lu)  ", len, temp, bitsUsed); \
+    temp = temp & ((1<<(16 - len)) - 1); \
+    temp = temp << len; \
+    bitsUsed -= len; \
+    printf("after=0x%04x(%lu)\n", temp, bitsUsed); \
+    } while (0)
+
+
 int compress(const char * in, size_t inLength,
               unsigned char * out, size_t outLength) {
     unsigned int temp = 0x0000;
@@ -64,20 +83,19 @@ int compress(const char * in, size_t inLength,
             }
 
             // Add it to temp
-            temp |= HuffValues[i] << bitsUsed;
-            bitsUsed += HuffLengths[i];
+            pushBits(HuffValues[i], HuffLengths[i]);
         } else {
             // Add a random byte
-            temp |= randomChar() << bitsUsed;
-            bitsUsed += 8;
+            //pushBits(randomChar(), 8);
+            pushBits(0xff, 8);
         }
 
         // Pop byte if we're there
         while (bitsUsed >= 8) {
-            out[outI] = temp & 0xFF;
+            out[outI] = peekBits(8);
+            printf("peeked: 0x%02x(8)\n", out[outI]);
+            popBits(8);
             outI++;
-            temp = temp >> 8;
-            bitsUsed -= 8;
         }
     }
 
@@ -99,24 +117,25 @@ int decompress(const unsigned char * in, size_t inLength,
     while (outI < outLength && inI < inLength) {
         // Add bits if needed
         while (bitsUsed < maxLength && inI < inLength) {
-            temp |= in[inI] << bitsUsed;
+            pushBits(in[inI], 8);
             inI++;
-            bitsUsed += 8;
         }
 
         // Search for the pattern we have
         for (i=0; i<TOKENEXT; i++) {
-            unsigned char pattern = temp & ((1<<HuffLengths[i]) - 1);
+            unsigned char pattern = peekBits(HuffLengths[i]);
+            printf("peeked: 0x%02x(%u)\n", pattern, HuffLengths[i]);
             if (pattern == HuffValues[i]) {
+                popBits(HuffLengths[i]);
                 out[outI] = TokenChars[i];
                 outI++;
-                temp = temp >> HuffLengths[i];
-                bitsUsed -= HuffLengths[i];
                 break;
             }
         }
         if (i == TOKENEXT) {
             printf("Can't find pattern: 0x%02x\n", temp);
+            out[outI] = '\0';
+            printf("String so far: %s\n", out);
             return -1;
         }
     }
