@@ -40,10 +40,10 @@ static void reset() {
 void randomInit() {
   // TODO: Connect a pin to more random signal
   long int seed = millis();
-  seed = seed ^ (analogRead(0) << 24);
-  seed = seed ^ (analogRead(1) << 16);
-  seed = seed ^ (analogRead(2) << 8);
-  seed = seed ^ (analogRead(3) << 0);
+  seed = seed ^ ((long int)analogRead(0) << 24);
+  seed = seed ^ ((long int)analogRead(1) << 16);
+  seed = seed ^ ((long int)analogRead(2) << 8);
+  seed = seed ^ ((long int)analogRead(3) << 0);
 
   Serial.print(F("Random seed: "));
   Serial.println(seed);
