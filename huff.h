@@ -33,7 +33,7 @@ static const unsigned char HuffLengths[] = {
 #define minLength 6
 #define maxLength 7
 
-size_t findIndex(char v) {
+static size_t findIndex(char v) {
     // Find the offset in the tables
     int i;
     for (i=0; i<TOKENEXT; i++) {
@@ -59,8 +59,8 @@ size_t findIndex(char v) {
     } while (0)
 
 
-int compress(const char * in, size_t inLength,
-              unsigned char * out, size_t outLength) {
+static int compress(const char * in, size_t inLength,
+                    unsigned char * out, size_t outLength) {
     unsigned int temp = 0x0000;
     size_t bitsUsed = 0;
     size_t inI = 0;
@@ -99,8 +99,8 @@ int compress(const char * in, size_t inLength,
     return 0;
 }
 
-int decompress(const unsigned char * in, size_t inLength,
-               char * out, size_t outLength) {
+static int decompress(const unsigned char * in, size_t inLength,
+                      char * out, size_t outLength) {
     unsigned int temp = 0x0000;
     size_t bitsUsed = 0;
     size_t inI = 0;
