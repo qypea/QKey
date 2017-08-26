@@ -38,7 +38,7 @@ int testCompressDecompress(const char * in, const size_t inLen)
     return 0;
 }
 
-#if 0
+#if 1
 int main(int argc, char** argv) {
     int ret;
     if (argc == 2) {

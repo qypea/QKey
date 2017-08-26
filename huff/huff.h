@@ -46,20 +46,16 @@ size_t findIndex(char v) {
 
 #define pushBits(v, len) do { \
     unsigned char val = v; \
-    printf("push 0x%02x(%u) before=0x%04x(%lu)  ", val, len, temp, bitsUsed); \
     temp |= val << (16 - bitsUsed - len); \
     bitsUsed += len; \
-    printf("after=0x%04x(%lu)\n", temp, bitsUsed); \
     } while(0)
 
 #define peekBits(len) (temp >> (16 - len))
 
 #define popBits(len) do { \
-    printf("pop %u before=0x%04x(%lu)  ", len, temp, bitsUsed); \
     temp = temp & ((1<<(16 - len)) - 1); \
     temp = temp << len; \
     bitsUsed -= len; \
-    printf("after=0x%04x(%lu)\n", temp, bitsUsed); \
     } while (0)
 
 
@@ -78,7 +74,6 @@ int compress(const char * in, size_t inLength,
             inI++;
             if (i == -1) {
                 // Invalid char
-                printf("Invalid char: %c\n", in[inI]);
                 return -1;
             }
 
@@ -86,14 +81,12 @@ int compress(const char * in, size_t inLength,
             pushBits(HuffValues[i], HuffLengths[i]);
         } else {
             // Add a random byte
-            //pushBits(randomChar(), 8);
-            pushBits(0xff, 8);
+            pushBits(randomChar(), 8);
         }
 
         // Pop byte if we're there
         while (bitsUsed >= 8) {
             out[outI] = peekBits(8);
-            printf("peeked: 0x%02x(8)\n", out[outI]);
             popBits(8);
             outI++;
         }
@@ -124,7 +117,6 @@ int decompress(const unsigned char * in, size_t inLength,
         // Search for the pattern we have
         for (i=0; i<TOKENEXT; i++) {
             unsigned char pattern = peekBits(HuffLengths[i]);
-            printf("peeked: 0x%02x(%u)\n", pattern, HuffLengths[i]);
             if (pattern == HuffValues[i]) {
                 popBits(HuffLengths[i]);
                 out[outI] = TokenChars[i];
@@ -133,9 +125,7 @@ int decompress(const unsigned char * in, size_t inLength,
             }
         }
         if (i == TOKENEXT) {
-            printf("Can't find pattern: 0x%02x\n", temp);
             out[outI] = '\0';
-            printf("String so far: %s\n", out);
             return -1;
         }
     }
