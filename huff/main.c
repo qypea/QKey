@@ -6,7 +6,7 @@ unsigned char randomChar() {
     return rand() & 0xff;
 }
 
-#include "huff.h"
+#include "../huff.h"
 
 int testCompressDecompress(const char * in, const size_t inLen)
 {

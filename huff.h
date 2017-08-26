@@ -1,4 +1,4 @@
-
+#pragma once
 
 static const char TokenChars[] =
   "0123456789" // 0..9
