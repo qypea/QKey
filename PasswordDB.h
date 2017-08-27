@@ -4,7 +4,7 @@
 unsigned char randomChar();
 #include "huff.h"
 
-#define PASSLEN 64
+#define PASSLEN 32
 uint8_t masterKey[PASSLEN] = "unset";
 size_t masterKeyLen = 5;
 
