@@ -99,7 +99,7 @@ static void getDB() {
 
 static void initDB() {
   header.recordCount = 0;
-  header.fileCheck.randomize(TOKENEXT);
+  header.fileCheck.randomize();
 
   // Erase the DB and write the new header
   getDB();
@@ -186,18 +186,10 @@ static void addRecord() {
 
   char method = readChar(F("Random or Manual password?(r/m) "), "rm");
   if (method == 'r') {
-    char allowed = readChar(F("Allowed Chars(b,e): "), "be");
-    if (allowed == 'b') {
-      record.password.randomize(TOKENBASE);
-    } else if (allowed == 'e') {
-      record.password.randomize(TOKENEXT);
-    } else {
-      Serial.println(F("Unexpected allowed chars"));
-      reset();
-    }
+    record.password.randomize();
   } else if (method == 'm') {
     readString(F("Password: "), pass);
-    record.password.wrap((uint8_t*)pass, strlen(pass));
+    record.password.wrap(pass, strlen(pass));
   } else {
     Serial.println(F("Unexpected password method"));
     reset();
