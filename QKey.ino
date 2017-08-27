@@ -90,6 +90,7 @@ void setup() {
   randomInit();
 
   digitalWrite(LEDSerial, LOW);
+  Serial.print('>');
 }
 
 static void getDB() {
@@ -354,9 +355,11 @@ static void enterRecord() {
 
 // Main loop
 void loop() {
+  int prompt = 1;
   if (Serial.available()) {
     digitalWrite(LEDSerial, HIGH);
     Serial.println();
+    prompt = 1;
 
     char c = Serial.read();
     switch (c) {
@@ -418,6 +421,7 @@ void loop() {
 
       case '\r':
       case '\n':
+        prompt = 0;
         // Ignore extra newlines
         break;
 
@@ -428,5 +432,8 @@ void loop() {
     };
 
     digitalWrite(LEDSerial, LOW);
+    if (prompt) {
+      Serial.print('>');
+    }
   }
 }
