@@ -11,17 +11,19 @@ size_t masterKeyLen = 5;
 static uint8_t temp[PASSLEN];
 static char tempStr[PASSLEN+1];
 
+static spritz_ctx ctx;
+
 struct Token {
   uint8_t cipherText[PASSLEN];
   uint8_t cipherLength;
   uint8_t nonce[PASSLEN];
 
   size_t unwrap(char * buffer, size_t bufferLen) const {
-    spritz_ctx ctx;
     spritz_setup_withIV(&ctx,
                         masterKey, masterKeyLen,
                         nonce, PASSLEN);
     spritz_crypt(&ctx, cipherText, PASSLEN, temp);
+    spritz_state_memzero(&ctx);
     size_t len = min(bufferLen, cipherLength);
     decompress(temp, PASSLEN, buffer, len);
     return len;
@@ -43,11 +45,11 @@ struct Token {
   void wrap(const char * buffer, size_t bufferLen) {
     randomNonce();
     compress(buffer, bufferLen, temp, PASSLEN);
-    spritz_ctx ctx;
     spritz_setup_withIV(&ctx,
                         masterKey, masterKeyLen,
                         nonce, PASSLEN);
     spritz_crypt(&ctx, temp, PASSLEN, cipherText);
+    spritz_state_memzero(&ctx);
     cipherLength = bufferLen;
   }
 
