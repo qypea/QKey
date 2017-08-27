@@ -39,11 +39,11 @@ static void reset() {
 // Random generator
 void randomInit() {
   // TODO: Connect a pin to more random signal
-  long int seed = millis();
-  seed = seed ^ ((long int)analogRead(0) << 24);
-  seed = seed ^ ((long int)analogRead(1) << 16);
-  seed = seed ^ ((long int)analogRead(2) << 8);
-  seed = seed ^ ((long int)analogRead(3) << 0);
+  long unsigned int seed = millis();
+  seed = seed ^ ((long unsigned int)analogRead(0) << 24);
+  seed = seed ^ ((long unsigned int)analogRead(1) << 16);
+  seed = seed ^ ((long unsigned int)analogRead(2) << 8);
+  seed = seed ^ ((long unsigned int)analogRead(3) << 0);
 
   Serial.print(F("Random seed: "));
   Serial.println(seed);
