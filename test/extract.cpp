@@ -17,7 +17,7 @@ unsigned char randomChar() {
     return rand() & 0xff;
 }
 
-#include "spritz_stub.hpp"
+#include <SpritzCipher.h>
 #include "../PasswordDB.h"
 
 int main(int argc, const char** argv) {
