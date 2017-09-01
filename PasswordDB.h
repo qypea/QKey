@@ -24,7 +24,7 @@ struct Token {
                         nonce, PASSLEN);
     spritz_crypt(&ctx, cipherText, PASSLEN, temp);
     spritz_state_memzero(&ctx);
-    size_t len = min(bufferLen, cipherLength);
+    size_t len = min(bufferLen, (size_t)cipherLength);
     decompress(temp, PASSLEN, buffer, len);
     return len;
   }
