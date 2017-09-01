@@ -1,0 +1,25 @@
+Init(db)
+Are you sure?(y,n): y
+Ok
+Records: 0
+File check: .1xopy+0J1[NOwz[
+>
+
+Add
+Description: test 1
+Username: foo
+Separator(t,n): t
+Random or Manual password?(r/m) r
+Password: B5T3eib92VKNdz0(
+Are you sure?(y,n): y
+Ok
+>
+
+Add
+Description: test 2
+Username: bar
+Separator(t,n): n
+Random or Manual password?(r/m) r
+Password: wr6N8ZFksC4&8kLB
+Are you sure?(y,n): y
+Ok
