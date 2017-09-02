@@ -36,21 +36,33 @@ static void reset() {
   while(1){};
 }
 
+spritz_ctx rng;
+const uint8_t rng_init[] = __DATE__ "T" __TIME__;
+unsigned long time;
+
 // Random generator
 void randomInit() {
+  spritz_setup(&rng, rng_init, sizeof(rng_init));
+
   // TODO: Connect a pin to more random signal
-  long unsigned int seed = millis();
-  seed = seed ^ ((long unsigned int)analogRead(0) << 24);
-  seed = seed ^ ((long unsigned int)analogRead(1) << 16);
-  seed = seed ^ ((long unsigned int)analogRead(2) << 8);
-  seed = seed ^ ((long unsigned int)analogRead(3) << 0);
+  uint8_t val;
+  int i;
+  for (i=0; i<4; i++) {
+    val = analogRead(i);
+    spritz_add_entropy(&rng, &val, 1);
+  }
+
+  // Note: this only makes sense because it is after the serial connect
+  // Otherwise it would not provide any entropy
+  time = millis();
+  spritz_add_entropy(&rng, (uint8_t*)&time, sizeof(time));
 
   Serial.print(F("Random seed: "));
-  Serial.println(seed);
-  randomSeed(seed);
+  Serial.println(spritz_random32(&rng));
 }
+
 unsigned char randomChar() {
-  return random(256);
+  return spritz_random8(&rng);
 }
 
 void setup() {
