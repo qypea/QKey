@@ -17,6 +17,14 @@ static AtomicFile db;
 static char search[PASSLEN];
 static char pass[PASSLEN];
 
+static void freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  v = (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+  Serial.print("Free ram: ");
+  Serial.println(v);
+}
+
 // Reset helper
 static void reset() {
   // Clear key material
@@ -102,6 +110,7 @@ void setup() {
   randomInit();
 
   digitalWrite(LEDSerial, LOW);
+  freeRam();
   Serial.print('>');
 }
 
@@ -447,6 +456,7 @@ void loop() {
 
     digitalWrite(LEDSerial, LOW);
     if (prompt) {
+      freeRam();
       Serial.print('>');
     }
   }
