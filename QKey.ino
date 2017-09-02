@@ -26,7 +26,7 @@ static void freeRam () {
 }
 
 // Reset helper
-static void reset() {
+void reset() {
   // Clear key material
   int i;
   for (i=0; i<PASSLEN; i++) {

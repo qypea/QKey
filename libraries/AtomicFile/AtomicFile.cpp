@@ -13,9 +13,7 @@
 
 #include "AtomicFile.h"
 
-
-// Reset helper
-static void(*reset) (void) = 0;
+extern void reset();
 
 static void copyFile(const String in, const String out) {
   File FDin = SD.open(in.c_str(), FILE_READ);
