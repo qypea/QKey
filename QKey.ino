@@ -116,7 +116,7 @@ void setup() {
 
 static void getDB() {
   digitalWrite(LEDSD, HIGH);
-  db = AtomicFile(F("/passwd.db"), F("/passwd.bak"));
+  db = AtomicFile("/passwd.db", "/passwd.bak");
 }
 
 static void initDB() {

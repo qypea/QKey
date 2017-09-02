@@ -15,18 +15,18 @@
 
 extern void reset();
 
-static void copyFile(const String in, const String out) {
-  File FDin = SD.open(in.c_str(), FILE_READ);
+static void copyFile(const char* in, const char* out) {
+  File FDin = SD.open(in, FILE_READ);
   if (!FDin) {
     Serial.println("Error opening file for copy input. Resetting");
     reset();
   }
 
-  if (SD.exists((char*)out.c_str())) {
-    SD.remove((char*)out.c_str());
+  if (SD.exists((char*)out)) {
+    SD.remove((char*)out);
   }
 
-  File FDout = SD.open(out.c_str(), FILE_WRITE);
+  File FDout = SD.open(out, FILE_WRITE);
   if (!FDout) {
     Serial.println("Error opening file for copy output. Resetting");
     reset();
@@ -41,12 +41,12 @@ static void copyFile(const String in, const String out) {
 
 AtomicFile::AtomicFile() {};
 
-AtomicFile::AtomicFile(const String filename, const String backup) {
-  fileCurrent = filename;
-  fileBackup = backup;
+AtomicFile::AtomicFile(const char* filename, const char* backup) {
+  strcpy(fileCurrent, filename);
+  strcpy(fileBackup, backup);
 
   // Roll back any unfinished transaction
-  if (SD.exists((char*)fileBackup.c_str())) {
+  if (SD.exists(fileBackup)) {
     active = true;
     abort();
   }
@@ -56,8 +56,8 @@ AtomicFile::AtomicFile(const String filename, const String backup) {
 }
 
 void AtomicFile::touch() {
-  if (!SD.exists((char*)fileCurrent.c_str())) {
-    File fd = SD.open(fileCurrent.c_str(), FILE_WRITE);
+  if (!SD.exists(fileCurrent)) {
+    File fd = SD.open(fileCurrent, FILE_WRITE);
     fd.write("");
     fd.close();
   }
@@ -67,16 +67,16 @@ File AtomicFile::open(int mode) {
   if (mode == FILE_READ) {
     if (active) {
       // In case of read during a transaction open the backup
-      return SD.open(fileBackup.c_str(), mode);
+      return SD.open(fileBackup, mode);
     } else {
-      return SD.open(fileCurrent.c_str(), mode);
+      return SD.open(fileCurrent, mode);
     }
   } else {
     // In case of write start a transaction and then return the file
     if (!active) {
       start();
     }
-    return SD.open(fileCurrent.c_str(), mode);
+    return SD.open(fileCurrent, mode);
   }
 }
 
@@ -85,7 +85,7 @@ void AtomicFile::erase() {
     abort();
   }
 
-  SD.remove((char*)fileCurrent.c_str());
+  SD.remove(fileCurrent);
   touch();
 }
 
@@ -94,7 +94,7 @@ void AtomicFile::clear() {
     start();
   }
 
-  SD.remove((char*)fileCurrent.c_str());
+  SD.remove(fileCurrent);
   touch();
 }
 
@@ -112,7 +112,7 @@ void AtomicFile::abort() {
     return;
   }
   copyFile(fileBackup, fileCurrent);
-  SD.remove((char*)fileBackup.c_str());
+  SD.remove(fileBackup);
 
   active = false;
 }
@@ -122,6 +122,6 @@ void AtomicFile::commit() {
     return;
   }
 
-  SD.remove((char*)fileBackup.c_str());
+  SD.remove(fileBackup);
   active = false;
 }

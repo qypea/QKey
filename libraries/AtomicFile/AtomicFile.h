@@ -14,7 +14,7 @@
 class AtomicFile {
   public:
     // Construct an atomic file with the specified backup
-    AtomicFile(String filename, String backup);
+    AtomicFile(const char* filename, const char* backup);
     AtomicFile();
 
     // Open the file for the given mode
@@ -34,8 +34,8 @@ class AtomicFile {
     void commit();
 
   private:
-    String fileCurrent;
-    String fileBackup;
+    char fileCurrent[16];
+    char fileBackup[16];
     bool active;
 
     void touch();
