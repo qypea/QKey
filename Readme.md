@@ -6,6 +6,8 @@ Unfortunately its usb connector broke off the board at one point, which left
 me in a bad spot. No backups; needing to reset all my passwords. So I made my
 own, based on ideas I'd gathered.
 
+This code is designed to run on an Adafruit Feather Adalogger.
+
 ## Design goals
 * Easy backups -- Copy a file from the sd card
 * Backups can easily unwrapped on a PC to migrate to another system
