@@ -117,6 +117,7 @@ static void dumpDBHeader() {
   File fd = db.open(FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
+  db.abort();
   digitalWrite(LEDSD, LOW);
 
   Serial.print(F("Records: "));
@@ -172,6 +173,7 @@ static void dumpDB(const char * filter) {
   }
 
   fd.close();
+  db.abort();
   digitalWrite(LEDSD, LOW);
 }
 
