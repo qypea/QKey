@@ -16,6 +16,7 @@ static struct PasswordRecord record;
 static AtomicFile db;
 static char search[PASSLEN];
 static char pass[PASSLEN];
+static File fd;
 
 static void freeRam () {
   extern int __heap_start, *__brkval;
@@ -126,7 +127,7 @@ static void initDB() {
   // Erase the DB and write the new header
   getDB();
   db.erase();
-  File fd = db.open(FILE_WRITE);
+  fd = db.open(FILE_WRITE);
   fd.write((char*)&header, sizeof(header));
   fd.close();
   db.commit();
@@ -135,7 +136,7 @@ static void initDB() {
 
 static void dumpDBHeader() {
   getDB();
-  File fd = db.open(FILE_READ);
+  fd = db.open(FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
   db.abort();
@@ -168,7 +169,7 @@ static void dumpRecordShort(const struct PasswordRecord & record) {
 
 static void dumpDB(const char * filter) {
   getDB();
-  File fd = db.open(FILE_READ);
+  fd = db.open(FILE_READ);
 
   fd.read(&header, sizeof(header));
 
@@ -229,7 +230,7 @@ static void addRecord() {
   getDB();
 
   // Read in current header
-  File fd = db.open(FILE_READ);
+  fd = db.open(FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
 
@@ -251,7 +252,7 @@ static void addRecord() {
 static int readRecordI() {
   // Read in current header
   getDB();
-  File fd = db.open(FILE_READ);
+  fd = db.open(FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
   db.abort();
@@ -317,7 +318,7 @@ static void showRecord() {
 
   // Open, advance
   getDB();
-  File fd = db.open(FILE_READ);
+  fd = db.open(FILE_READ);
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
   // Read in, print record
@@ -338,7 +339,7 @@ static void enterRecord() {
 
   // Open, advance
   getDB();
-  File fd = db.open(FILE_READ);
+  fd = db.open(FILE_READ);
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
   // Read
