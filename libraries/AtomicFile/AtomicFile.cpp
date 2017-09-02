@@ -15,8 +15,12 @@
 
 extern void reset();
 
+static File FDin;
+static File FDout;
+static File FDtouch;
+
 static void copyFile(const char* in, const char* out) {
-  File FDin = SD.open(in, FILE_READ);
+  FDin = SD.open(in, FILE_READ);
   if (!FDin) {
     Serial.println("Error opening file for copy input. Resetting");
     reset();
@@ -26,7 +30,7 @@ static void copyFile(const char* in, const char* out) {
     SD.remove((char*)out);
   }
 
-  File FDout = SD.open(out, FILE_WRITE);
+  FDout = SD.open(out, FILE_WRITE);
   if (!FDout) {
     Serial.println("Error opening file for copy output. Resetting");
     reset();
@@ -57,9 +61,9 @@ AtomicFile::AtomicFile(const char* filename, const char* backup) {
 
 void AtomicFile::touch() {
   if (!SD.exists(fileCurrent)) {
-    File fd = SD.open(fileCurrent, FILE_WRITE);
-    fd.write("");
-    fd.close();
+    FDtouch = SD.open(fileCurrent, FILE_WRITE);
+    FDtouch.write("");
+    FDtouch.close();
   }
 }
 
