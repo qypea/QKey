@@ -29,10 +29,10 @@ struct Token {
     return len;
   }
 
-  String unwrap() const {
+  const char* unwrap() const {
     size_t len = unwrap(tempStr, PASSLEN);
     tempStr[len] = '\0';
-    return String(tempStr);
+    return tempStr;
   }
 
   void randomNonce() {

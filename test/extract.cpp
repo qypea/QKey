@@ -10,7 +10,6 @@
 #include <string>
 #include <iostream>
 
-#define String std::string
 #define min std::min
 
 unsigned char randomChar() {
@@ -47,7 +46,7 @@ int main(int argc, const char** argv) {
     }
 
     printf("Records: %d\n", header.recordCount);
-    printf("File check: %s\n", header.fileCheck.unwrap().c_str());
+    printf("File check: %s\n", header.fileCheck.unwrap());
 
     for (int i=0; i<header.recordCount; i++) {
         printf("Record %d\n", i);
@@ -61,7 +60,7 @@ int main(int argc, const char** argv) {
         printf("  Description: %s\n", record.description);
         printf("  Username: %s\n", record.username);
         printf("  Separator: %c\n", record.separator);
-        printf("  Password: %s\n", record.password.unwrap().c_str());
+        printf("  Password: %s\n", record.password.unwrap());
     }
 
     return 0;
