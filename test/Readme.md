@@ -1,11 +1,8 @@
 To build test programs use cmake:
 
 ```shell
-mkdir build
-cd build
-cmake ../ -DSPRITZ_LIB=~/docs/programs/Arduino/libraries/SpritzCipher
-cd ..
-make -C build
+cmake . -DSPRITZ_LIB=~/docs/programs/Arduino/libraries/SpritzCipher
+make
 ```
 
 Two test programs will be built:
