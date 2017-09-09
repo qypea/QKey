@@ -229,7 +229,9 @@ static void addRecord() {
   fd.close();
 
   // Write record
-  fd = SD.open(fname, FILE_WRITE); // Write appends
+  fd = SD.open(fname, FILE_WRITE);
+  fd.seek(sizeof(struct PasswordHeader)
+          + (sizeof(record) * header.recordCount));
   fd.write((char*)&record, sizeof(record));
 
   // Write length +1
@@ -274,7 +276,35 @@ static void deleteRecord() {
     return;
   }
 
-  // TODO: Implement deletion
+  digitalWrite(LEDSD, HIGH);
+  // Read in header
+  fd = SD.open(fname, FILE_READ);
+  fd.read(&header, sizeof(header));
+  fd.close();
+
+  int i;
+  for (i=target; i<header.recordCount; i++) {
+    // Read in record+1
+    fd = SD.open(fname, FILE_READ);
+    fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * (i+1)));
+    memset(&record, 0, sizeof(record)); // for if read is past end
+    fd.read(&record, sizeof(record));
+    fd.close();
+
+    // Write out record
+    fd = SD.open(fname, FILE_WRITE);
+    fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * i));
+    fd.write((char*)&record, sizeof(record));
+    fd.close();
+  }
+
+  // Write out new header
+  header.recordCount--;
+  fd = SD.open(fname, FILE_WRITE);
+  fd.seek(0);
+  fd.write((char*)&header, sizeof(header));
+  fd.close();
+  digitalWrite(LEDSD, LOW);
 }
 
 static void showRecord() {
