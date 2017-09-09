@@ -323,6 +323,9 @@ static void showRecord() {
   if (target < 0) {
     return;
   }
+  if (!confirm()) {
+    return;
+  }
 
   // Open, advance
   digitalWrite(LEDSD, HIGH);
