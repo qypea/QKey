@@ -5,10 +5,13 @@
 #include <SpritzCipher.h>
 
 #include "PasswordDB.h"
-#include "BasicUI.h"
 
 const int LEDSerial = 13;
 const int LEDSD = 8;
+const int buttonPin = 10;
+const int groundPin = 12;
+
+#include "BasicUI.h"
 
 static struct PasswordHeader header;
 static struct PasswordRecord record;
@@ -76,6 +79,10 @@ unsigned char randomChar() {
 void setup() {
   pinMode(LEDSerial, OUTPUT);
   pinMode(LEDSD, OUTPUT);
+  pinMode(buttonPin, INPUT);
+  digitalWrite(buttonPin, HIGH);
+  pinMode(groundPin, OUTPUT);
+  digitalWrite(groundPin, LOW);
 
   // Open serial communications and wait for port to open:
   digitalWrite(LEDSerial, HIGH);
@@ -112,9 +119,13 @@ void setup() {
 
   dumpDBHeader();
   dumpDB(NULL);
-
   digitalWrite(LEDSerial, LOW);
   freeRam();
+
+  if (!confirm()) {
+    reset();
+  }
+
   Serial.print('>');
 }
 
@@ -347,15 +358,6 @@ static void enterRecord() {
 
   if (!confirm()) {
     return;
-  }
-
-  // TODO: Replace this countdown with confirm on button
-  int i;
-  for (i=0; i<30; i++) {
-    delay(500);
-    digitalWrite(LEDSerial, LOW);
-    delay(500);
-    digitalWrite(LEDSerial, HIGH);
   }
 
   // Send record to keyboard

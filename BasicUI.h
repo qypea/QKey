@@ -28,16 +28,36 @@ static char readChar(const __FlashStringHelper* prompt, const char * allowed) {
 }
 
 static bool confirm() {
-  char c = readChar(F("Are you sure?(y,n): "), "yYnN");
-  if (c == 'y' || c == 'Y') {
-    Serial.println(F("Ok"));
-    return true;
-  } else if (c == 'n' || c == 'N') {
+  bool blink = false;
+  int count = 0;
+  int previous = HIGH;
+
+  Serial.println(F("Are you sure?(Button)"));
+
+  while (count == 0 || previous == LOW) {
+    if (digitalRead(buttonPin) == LOW) {
+      count++;
+      previous = LOW;
+    } else {
+      previous = HIGH;
+    }
+
+    if (blink && count == 0) {
+      digitalWrite(LEDSerial, HIGH);
+    } else {
+      digitalWrite(LEDSerial, LOW);
+    }
+    blink = !blink;
+
+    delay(100);
+  }
+
+  if (count > 10) {
     Serial.println(F("Aborted"));
     return false;
   } else {
-    Serial.println(F("Logic error"));
-    return false;
+    Serial.println(F("Ok"));
+    return true;
   }
 }
 
