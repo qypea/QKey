@@ -5,7 +5,7 @@ static void readString(const __FlashStringHelper* prompt, char buffer[PASSLEN]) 
   Serial.print(prompt);
   int read;
   do {
-    read = Serial.readBytesUntil('\n', buffer, PASSLEN);
+    read = Serial.readBytesUntil('\r', buffer, PASSLEN);
   } while (read == 0);
   buffer[read] = 0;
   Serial.println(buffer);
