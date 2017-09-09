@@ -2,7 +2,6 @@
 #include <SD.h>
 #include <avr/wdt.h>
 
-#include <AtomicFile.h>
 #include <SpritzCipher.h>
 
 #include "PasswordDB.h"
@@ -13,10 +12,10 @@ const int LEDSD = 8;
 
 static struct PasswordHeader header;
 static struct PasswordRecord record;
-static AtomicFile db;
 static char search[PASSLEN];
 static char pass[PASSLEN];
 static File fd;
+static const char fname[] = "/passwd.db";
 
 static void freeRam () {
   extern int __heap_start, *__brkval;
@@ -105,19 +104,18 @@ void setup() {
   readString(F("Password: "), (char*)masterKey);
   masterKeyLen = strlen((char*)masterKey);
 
+  randomInit();
+
+  if (!SD.exists(fname)) {
+    initDB();
+  }
+
   dumpDBHeader();
   dumpDB(NULL);
-
-  randomInit();
 
   digitalWrite(LEDSerial, LOW);
   freeRam();
   Serial.print('>');
-}
-
-static void getDB() {
-  digitalWrite(LEDSD, HIGH);
-  db = AtomicFile("/passwd.db", "/passwd.bak");
 }
 
 static void initDB() {
@@ -125,21 +123,19 @@ static void initDB() {
   header.fileCheck.randomize();
 
   // Erase the DB and write the new header
-  getDB();
-  db.erase();
-  fd = db.open(FILE_WRITE);
+  digitalWrite(LEDSD, HIGH);
+  SD.remove(fname);
+  fd = SD.open(fname, FILE_WRITE);
   fd.write((char*)&header, sizeof(header));
   fd.close();
-  db.commit();
   digitalWrite(LEDSD, LOW);
 }
 
 static void dumpDBHeader() {
-  getDB();
-  fd = db.open(FILE_READ);
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
-  db.abort();
   digitalWrite(LEDSD, LOW);
 
   Serial.print(F("Records: "));
@@ -168,8 +164,8 @@ static void dumpRecordShort(const struct PasswordRecord & record) {
 }
 
 static void dumpDB(const char * filter) {
-  getDB();
-  fd = db.open(FILE_READ);
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
 
   fd.read(&header, sizeof(header));
 
@@ -195,7 +191,6 @@ static void dumpDB(const char * filter) {
   }
 
   fd.close();
-  db.abort();
   digitalWrite(LEDSD, LOW);
 }
 
@@ -227,15 +222,14 @@ static void addRecord() {
     return;
   }
 
-  getDB();
-
   // Read in current header
-  fd = db.open(FILE_READ);
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
 
   // Write record
-  fd = db.open(FILE_WRITE); // Write appends
+  fd = SD.open(fname, FILE_WRITE); // Write appends
   fd.write((char*)&record, sizeof(record));
 
   // Write length +1
@@ -245,17 +239,15 @@ static void addRecord() {
 
   // Commit it all
   fd.close();
-  db.commit();
   digitalWrite(LEDSD, LOW);
 }
 
 static int readRecordI() {
   // Read in current header
-  getDB();
-  fd = db.open(FILE_READ);
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
   fd.read(&header, sizeof(header));
   fd.close();
-  db.abort();
   digitalWrite(LEDSD, LOW);
 
   // Read in user input as int
@@ -282,32 +274,7 @@ static void deleteRecord() {
     return;
   }
 
-  getDB();
-  db.start();
-  db.clear();
-
-  // Read in current header
-  File r_fd = db.open(FILE_READ);
-  r_fd.read(&header, sizeof(header));
-
-  // Open for write
-  File w_fd = db.open(FILE_WRITE); // Write appends
-  header.recordCount--;
-  w_fd.write((char*)&header, sizeof(header));
-
-  int i;
-  for (i=0; i<header.recordCount+1; i++) {
-    r_fd.read(&record, sizeof(record));
-    if (i != target) {
-      w_fd.write((char*)&record, sizeof(record));
-    }
-  }
-
-  // Commit it all
-  r_fd.close();
-  w_fd.close();
-  db.commit();
-  digitalWrite(LEDSD, LOW);
+  // TODO: Implement deletion
 }
 
 static void showRecord() {
@@ -317,8 +284,8 @@ static void showRecord() {
   }
 
   // Open, advance
-  getDB();
-  fd = db.open(FILE_READ);
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
   // Read in, print record
@@ -327,7 +294,6 @@ static void showRecord() {
 
   // Clean up
   fd.close();
-  db.abort();
   digitalWrite(LEDSD, LOW);
 }
 
@@ -338,8 +304,8 @@ static void enterRecord() {
   }
 
   // Open, advance
-  getDB();
-  fd = db.open(FILE_READ);
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
   fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
 
   // Read
@@ -347,7 +313,6 @@ static void enterRecord() {
 
   // Clean up
   fd.close();
-  db.abort();
   digitalWrite(LEDSD, LOW);
 
   if (!confirm()) {
