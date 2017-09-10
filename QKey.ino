@@ -118,7 +118,6 @@ void setup() {
   }
 
   dumpDBHeader();
-  dumpDB(NULL);
   digitalWrite(LEDSerial, LOW);
 
   if (!confirm()) {
