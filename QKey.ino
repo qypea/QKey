@@ -270,8 +270,21 @@ static int readRecordI() {
     Serial.println(F("Invalid record"));
     return -1;
   }
-
   Serial.println(target);
+
+  // Open, advance
+  digitalWrite(LEDSD, HIGH);
+  fd = SD.open(fname, FILE_READ);
+  fd.seek(sizeof(struct PasswordHeader) + (sizeof(record) * target));
+
+  // Read in, print record
+  fd.read(&record, sizeof(record));
+  dumpRecordShort(record);
+
+  // Clean up
+  fd.close();
+  digitalWrite(LEDSD, LOW);
+
   return target;
 }
 
