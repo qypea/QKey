@@ -120,7 +120,6 @@ void setup() {
   dumpDBHeader();
   dumpDB(NULL);
   digitalWrite(LEDSerial, LOW);
-  freeRam();
 
   if (!confirm()) {
     reset();
@@ -457,7 +456,6 @@ void loop() {
 
     digitalWrite(LEDSerial, LOW);
     if (prompt) {
-      freeRam();
       Serial.print('>');
     }
   }
