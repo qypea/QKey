@@ -1,13 +1,19 @@
 #ifndef _QKEY_BASICUI_H_
 #define _QKEY_BASICUI_H_
 
-static void readString(const __FlashStringHelper* prompt, char buffer[PASSLEN]) {
+static void readStringSilent(const __FlashStringHelper* prompt,
+                             char buffer[PASSLEN]) {
   Serial.print(prompt);
   int read;
   do {
     read = Serial.readBytesUntil('\r', buffer, PASSLEN);
   } while (read == 0);
   buffer[read] = 0;
+}
+
+static void readString(const __FlashStringHelper* prompt,
+                       char buffer[PASSLEN]) {
+  readStringSilent(prompt, buffer);
   Serial.println(buffer);
 }
 

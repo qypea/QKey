@@ -108,8 +108,9 @@ void setup() {
   Serial.println(F("done."));
   digitalWrite(LEDSD, LOW);
 
-  readString(F("Password: "), (char*)masterKey);
+  readStringSilent(F("Password: "), (char*)masterKey);
   masterKeyLen = strlen((char*)masterKey);
+  Serial.println("");
 
   randomInit();
 
