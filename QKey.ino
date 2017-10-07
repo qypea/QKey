@@ -257,6 +257,9 @@ static void addRecord() {
   // Commit it all
   fd.close();
   digitalWrite(LEDSD, LOW);
+
+  Serial.print("Added as record: ");
+  Serial.println(header.recordCount-1);
 }
 
 static int readRecordI() {
