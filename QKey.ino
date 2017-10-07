@@ -108,9 +108,10 @@ void setup() {
   Serial.println(F("done."));
   digitalWrite(LEDSD, LOW);
 
-  readStringSilent(F("Password: "), (char*)masterKey);
+  if (readPassword(F("Password: "), (char*)masterKey) <= 0) {
+    reset();
+  }
   masterKeyLen = strlen((char*)masterKey);
-  Serial.println("");
 
   randomInit();
 
@@ -205,20 +206,27 @@ static void dumpDB(const char * filter) {
 }
 
 static void find() {
-  readString(F("Search term: "), search);
-  dumpDB(search);
+  if (readString(F("Search term: "), search) > 0) {
+    dumpDB(search);
+  }
 }
 
 static void addRecord() {
-  readString(F("Description: "), record.description);
-  readString(F("Username: "), record.username);
+  if (readString(F("Description: "), record.description) <= 0) {
+    return;
+  }
+  if (readString(F("Username: "), record.username) <= 0) {
+    return;
+  }
   record.separator = readChar(F("Separator(t,n): "), "tn");
 
   char method = readChar(F("Random or Manual password?(r/m) "), "rm");
   if (method == 'r') {
     record.password.randomize();
   } else if (method == 'm') {
-    readString(F("Password: "), pass);
+    if (readPassword(F("Password: "), pass) <= 0) {
+      return;
+    }
     record.password.wrap(pass, strlen(pass));
   } else {
     Serial.println(F("Unexpected password method"));
@@ -263,8 +271,10 @@ static int readRecordI() {
   digitalWrite(LEDSD, LOW);
 
   // Read in user input as int
-  Serial.print(F("Index: "));
-  int target = Serial.parseInt();
+  int target = readPosInt(F("Index: "));
+  if (target < 0) {
+    return -1;
+  }
 
   // Range check
   if (target >= header.recordCount) {

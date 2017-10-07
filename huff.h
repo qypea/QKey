@@ -33,7 +33,7 @@ static const unsigned char HuffLengths[] = {
 #define minLength 6
 #define maxLength 7
 
-static size_t findIndex(char v) {
+static int findIndex(char v) {
     // Find the offset in the tables
     int i;
     for (i=0; i<TOKENEXT; i++) {
@@ -42,6 +42,10 @@ static size_t findIndex(char v) {
         }
     }
     return -1;
+}
+
+static bool isHuff(int c) {
+  return (findIndex(c) >= 0);
 }
 
 #define pushBits(v, len) do { \
