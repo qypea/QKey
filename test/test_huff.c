@@ -6,6 +6,8 @@ unsigned char randomChar() {
     return rand() & 0xff;
 }
 
+#define bool int
+
 #include "../huff.h"
 
 int testCompressDecompress(const char * in, const size_t inLen)
@@ -72,6 +74,10 @@ int main() {
         char out = '\0';
 
         printf("%c: ", in);
+
+        if (!isHuff(in)) {
+            printf("Invalid char %c\n", in);
+        }
 
         int ret = compress(&in, 1, &com, 1);
         if (ret != 0) {
