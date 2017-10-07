@@ -67,9 +67,6 @@ void randomInit() {
   // Otherwise it would not provide any entropy
   time = millis();
   spritz_add_entropy(&rng, (uint8_t*)&time, sizeof(time));
-
-  Serial.print(F("Random seed: "));
-  Serial.println(spritz_random32(&rng));
 }
 
 unsigned char randomChar() {
