@@ -106,6 +106,10 @@ static bool confirm() {
   int count = 0;
   int previous = HIGH;
 
+  if (digitalRead(buttonPin) == LOW) {
+    Serial.println("Button appears stuck.");
+    return false;
+  }
   Serial.println(F("Are you sure?(Button)"));
 
   while (count == 0 || previous == LOW) {
