@@ -406,18 +406,6 @@ void loop() {
 
     char c = Serial.read();
     switch (c) {
-      case 'h':
-        Serial.println(F("Help"));
-        Serial.println(F(" Find"));
-        Serial.println(F(" Add"));
-        Serial.println(F(" Delete(i)"));
-        Serial.println(F(" Show(i)"));
-        Serial.println(F(" Enter(i)"));
-        Serial.println(F(" Init(db)"));
-        Serial.println(F(" Print(db)"));
-        Serial.println(F(" Quit"));
-        break;
-
       case 'f': // Find, print matching records
         Serial.println(F("Find"));
         find();
@@ -471,6 +459,17 @@ void loop() {
       default:
         Serial.print(F("Unknown command: "));
         Serial.println(c);
+        // Fall through to help
+      case 'h':
+        Serial.println(F("Help"));
+        Serial.println(F(" Find"));
+        Serial.println(F(" Add"));
+        Serial.println(F(" Delete(i)"));
+        Serial.println(F(" Show(i)"));
+        Serial.println(F(" Enter(i)"));
+        Serial.println(F(" Init(db)"));
+        Serial.println(F(" Print(db)"));
+        Serial.println(F(" Quit"));
         break;
     };
 
