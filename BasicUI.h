@@ -112,6 +112,9 @@ static bool confirm() {
     if (digitalRead(buttonPin) == LOW) {
       count++;
       previous = LOW;
+      if (count > 10) {
+        break;
+      }
     } else {
       previous = HIGH;
     }
